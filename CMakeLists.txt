@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(NewPlugin LANGUAGES CXX VERSION 1.0.0)
+set(PROJECT_NAME mocap_plugin)
+set(PROJECT_DESCRIPTION "")
+set(PROJECT_URL "")
+set(PROJECT_VERSION 0.0.1)
+set(PROJECT_USE_CMAKE_EXPORT TRUE)
+set(CMAKE_CXX_STANDARD 11)
+
+project(${PROJECT_NAME} LANGUAGES CXX VERSION ${PROJECT_VERSION})
+option(AUTOLOAD_${PROJECT_NAME}_PLUGIN "Automatically load ${PROJECT_NAME} plugin" OFF)
+
 
 include(CTest)
 enable_testing()
@@ -9,21 +18,36 @@ enable_testing()
 if(NOT TARGET mc_rtc::mc_control)
   find_package(mc_rtc REQUIRED)
 endif()
+find_package(roscpp REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+  std_msgs_stamped
+) 
+
+
 
 # Configure and install the plugin configuration
-configure_file(etc/NewPlugin.in.yaml "${CMAKE_CURRENT_BINARY_DIR}/etc/NewPlugin.yaml")
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/etc/NewPlugin.yaml" DESTINATION "${MC_PLUGINS_RUNTIME_INSTALL_PREFIX}/etc")
+configure_file(etc/${PROJECT_NAME}.in.yaml "${CMAKE_CURRENT_BINARY_DIR}/etc/${PROJECT_NAME}.yaml")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/etc/${PROJECT_NAME}.yaml" DESTINATION "${MC_PLUGINS_RUNTIME_INSTALL_PREFIX}/etc")
+
+
 
 set(plugin_SRC
-  src/NewPlugin.cpp
+  src/plugin.cpp
+  src/MoCap.cpp
   )
 
 set(plugin_HDR
-  src/NewPlugin.h
+  src/MoCap.h
+  src/plugin.h
 )
 
 # The add_plugin macro is provided by mc_rtc
-add_plugin(NewPlugin "${plugin_SRC}" "${plugin_HDR}")
+add_plugin(${PROJECT_NAME} "${plugin_SRC}" "${plugin_HDR}")
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${roscpp_INCLUDE_DIRS})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${roscpp_LIBRARIES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${std_msgs_stamped_INCLUDE_DIRS})
+
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
