@@ -2,8 +2,8 @@
 
 MoCap_Data::MoCap_Data()
 {
-  m_Datas = Eigen::VectorXd::Zero(16 * 21 + 3);
-  Datas = Eigen::MatrixXd::Zero(N_samples_in, 21 * 16 + 3);
+  m_Datas = Eigen::VectorXd::Zero(n_elements_);
+  Datas = Eigen::MatrixXd::Zero(N_samples_in, n_elements_);
 
   LeftHandPose_seq = Eigen::MatrixXd::Zero(N_samples_in, 3);
   LeftHandAcc_seq = Eigen::MatrixXd::Zero(N_samples_in, 3);
@@ -25,8 +25,8 @@ void MoCap_Data::node_sub(ros::NodeHandle nh)
   sub_mocap_Rhd_acc.subscribe(nh, "MoCap/R_HandAcc_seq");
   sub_mocap_.maxTime(maxTime_);
 
-  m_Datas = Eigen::VectorXd::Zero(16 * 21 + 3);
-  Datas = Eigen::MatrixXd::Zero(N_samples_in, 21 * 16 + 3);
+  m_Datas = Eigen::VectorXd::Zero(n_elements_);
+  Datas = Eigen::MatrixXd::Zero(N_samples_in, n_elements_);
 }
 
 void MoCap_Data::Update_Data_()
@@ -75,8 +75,8 @@ void MoCap_Data::convert_data(const std::string & data)
   // }
   size_t indx_start = 0;
   size_t pos = 0;
-  
-  for (int k = 0 ; k < data.length() ; k++)
+
+  while(double_data.size() < n_elements_)
   {
     size_t pos = data.find(' ',indx_start);
     std::string double_val = data.substr(indx_start,pos - indx_start);
@@ -88,6 +88,9 @@ void MoCap_Data::convert_data(const std::string & data)
   }
 
   m_Datas = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(double_data.data(), double_data.size());
+  FootState.x() = MoCap_Coord(RightHandThumb1, MoCap_Position).x();
+  FootState.y() = MoCap_Coord(RightHandThumb1, MoCap_Position).y();
+  // std::cout << m_Datas << std::endl;
   std::chrono::duration<double, std::milli> time_span = std::chrono::high_resolution_clock::now() - t_clock;
   // mc_rtc::log::info(time_span.count());
 }

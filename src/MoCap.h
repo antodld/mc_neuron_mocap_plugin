@@ -180,6 +180,7 @@ public:
 
 private:
 
+  int n_elements_ = 16 * 21 + 3; //Number of data to take from the stream;
 
   ROSMultiArrayStampedSubscriber sub_mocap_;
   ROSMultiArrayStampedSubscriber sub_mocap_Lhd_pose;

@@ -30,11 +30,16 @@ struct mocap_plugin : public mc_control::GlobalPlugin
 private:
   std::shared_ptr<ros::NodeHandle> nh_;
   MoCap_Data mocap_;
+  std::thread data_thread_;
 
   std::string ip_;
   int n_port_;
+  int freq_;
 
-  void ROS_Spinner();
+  bool spinner_on_ = true;
+  bool mocap_online_ = false;
+
+  void Data_Spinner();
   sva::PTransformd get_pose(MoCap_Body_part part);
   sva::MotionVecd get_vel(MoCap_Body_part part);
   Eigen::Vector3d get_accel(MoCap_Body_part part);

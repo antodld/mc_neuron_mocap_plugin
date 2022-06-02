@@ -6,15 +6,41 @@
 
 ClientSocket::ClientSocket ( std::string host, int port )
 {
-  if ( ! Socket::create() )
-    {
-      throw SocketException ( "Could not create client socket." );
-    }
+  host_ = host;
+  port_ = port;
+  // if ( ! Socket::create() )
+  //   {
+  //     throw SocketException ( "Could not create client socket." );
+  //   }
 
-  if ( ! Socket::connect ( host, port ) )
+  // if ( ! Socket::connect ( host, port ) )
+  //   {
+  //     throw SocketException ( "Could not bind to port." );
+  //   }
+
+  created_ = Socket::create();
+  if (!created_){std::cout << "[ClientSocket] Warning : Could not create client socket " << std::endl;}
+  else
+  {
+    connected_ = Socket::connect ( host_, port_ );
+    if(!connected_){std::cout << "[ClientSocket] Warning : Could not bind to port " << std::endl;}
+  }
+
+}
+
+bool ClientSocket::connect()
+{
+  if (!created_)
+  {
+    created_ = Socket::create();
+    if (!created_)
     {
-      throw SocketException ( "Could not bind to port." );
+      std::cout << "[ClientSocket] Warning : Could not create client socket " << std::endl;
+      return false;
     }
+  }
+  connected_ = Socket::connect ( host_, port_ );
+  return connected_;
 
 }
 

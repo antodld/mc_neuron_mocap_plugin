@@ -18,6 +18,26 @@ class ClientSocket : private Socket
   {
     return created_;
   }
+  std::string host()
+  {
+    return host_;
+  }
+  void host(const std::string & host)
+  {
+    host_ = host;
+  }
+  int port()
+  {
+    return port_;
+  }
+  void port(const int port)
+  {
+    port_ = port;
+  }
+
+  bool connect();
+
+  bool create();
 
   ClientSocket() = default;
   ClientSocket ( std::string host, int port );
@@ -28,8 +48,10 @@ class ClientSocket : private Socket
 
   private :
 
-    connected_ = false;
-    created_ = false;
+    bool connected_ = false;
+    bool created_ = false;
+    int port_;
+    std::string host_;
 
 };
 
