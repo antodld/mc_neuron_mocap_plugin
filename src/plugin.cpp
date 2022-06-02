@@ -9,6 +9,10 @@ mocap_plugin::~mocap_plugin() = default;
 
 void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rtc::Configuration & config)
 {
+
+  config("ip",ip_);
+  config("port",n_port_);
+
   mc_rtc::log::info("[mocap plugin] Initialize ROS Bridge");
   nh_ = mc_rtc::ROSBridge::get_node_handle();
   std::thread ROS_Thread(&mocap_plugin::ROS_Spinner, this);
@@ -32,7 +36,36 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
   controller.controller().datastore().make_call(
       "mocap_plugin::get_footstate", [this](MoCap_Body_part part) -> int { return mocap_.foot_contact(part); });
 
+  
+
+
+  try
+    {
+
+      ClientSocket client_socket_ = ClientSocket( ip_, n_port_ );
+
+      std::string reply;
+
+      try
+      {
+        // client_socket << "Test message.";
+        client_socket_ >> reply;
+      }
+      catch ( SocketException& ) {}
+
+      std::cout << "We received this response from the server:\n\"" << reply << "\"\n";;
+
+    }
+  catch ( SocketException& e )
+    {
+      std::cout << "Exception was caught:" << e.description() << "\n";
+    }
+
+
+
+
   mc_rtc::log::info("mocap_plugin::init called with configuration:\n{}", config.dump(true, true));
+
 }
 
 void mocap_plugin::reset(mc_control::MCGlobalController & controller)
@@ -57,6 +90,8 @@ void mocap_plugin::after(mc_control::MCGlobalController & controller)
   controller.controller().datastore().assign<Eigen::MatrixXd>("mocap_plugin::RightHand_pose_seq",
                                                               mocap_.get_RightHandPose_seq().transpose());
   controller.controller().datastore().assign<bool>("mocap_plugin::online", mocap_.Datas_Online());
+
+  mc_rtc::log::info(mocap_.get_pose(LeftHand).translation());
 }
 
 mc_control::GlobalPlugin::GlobalPluginConfiguration mocap_plugin::configuration()
@@ -70,13 +105,32 @@ mc_control::GlobalPlugin::GlobalPluginConfiguration mocap_plugin::configuration(
 
 void mocap_plugin::ROS_Spinner()
 {
-  ros::Rate loop_rate(300);
-  while(ros::ok)
+  ros::Rate loop_rate(60);
+
+  try
   {
-    ros::spinOnce();
-    mocap_.tick(1 / 300);
-    loop_rate.sleep();
+
+    ClientSocket client_socket_ = ClientSocket( ip_, n_port_ );
+    while(ros::ok)
+    {
+      std::string data;
+      try
+      {
+        client_socket_ >> data;
+      }
+      catch ( SocketException& ) {}
+      // std::cout << "data " << data << std::endl;
+      mocap_.convert_data(data);
+      ros::spinOnce();
+      mocap_.tick(1 / 60);
+      loop_rate.sleep();
+    }
   }
+  catch ( SocketException& e )
+  {
+    std::cout << "Exception was caught:" << e.description() << "\n";
+  }
+
 }
 
 } // namespace mc_plugin

@@ -9,6 +9,9 @@
 #include <thread>
 #include <unistd.h>
 #include <vector>
+#include <sstream>
+#include <iterator>
+
 
 enum MoCap_Body_part
 {
@@ -171,8 +174,13 @@ public:
   int id = 0;
 
   std::chrono::high_resolution_clock::time_point t_clock;
+  
+  void convert_data(const std::string & data);
+
 
 private:
+
+
   ROSMultiArrayStampedSubscriber sub_mocap_;
   ROSMultiArrayStampedSubscriber sub_mocap_Lhd_pose;
   ROSMultiArrayStampedSubscriber sub_mocap_Lhd_acc;

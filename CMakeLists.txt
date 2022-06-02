@@ -34,11 +34,17 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/etc/${PROJECT_NAME}.yaml" DESTINATION
 set(plugin_SRC
   src/plugin.cpp
   src/MoCap.cpp
+  src/ClientSocket.cpp
+  src/Socket.cpp
   )
 
 set(plugin_HDR
   src/MoCap.h
   src/plugin.h
+  src/Socket.h
+  src/ClientSocket.h
+  src/SocketException.h
+
 )
 
 # The add_plugin macro is provided by mc_rtc

@@ -6,6 +6,9 @@
 
 #include <mc_control/GlobalPlugin.h>
 #include "MoCap.h"
+#include "ClientSocket.h"
+#include "SocketException.h"
+#include <iostream>
 
 namespace mc_plugin
 {
@@ -27,6 +30,9 @@ struct mocap_plugin : public mc_control::GlobalPlugin
 private:
   std::shared_ptr<ros::NodeHandle> nh_;
   MoCap_Data mocap_;
+
+  std::string ip_;
+  int n_port_;
 
   void ROS_Spinner();
   sva::PTransformd get_pose(MoCap_Body_part part);
