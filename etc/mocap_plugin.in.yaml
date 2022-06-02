@@ -2,3 +2,4 @@
 ip : "172.30.1.15"
 port : 7001
 freq: 60
+sequence_size : 60

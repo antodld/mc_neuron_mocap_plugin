@@ -1,17 +1,15 @@
 #pragma once
 #include <mc_control/mc_controller.h>
-#include "ROSSubscriber.h"
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <math.h>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <unistd.h>
 #include <vector>
-#include <sstream>
-#include <iterator>
-
 
 enum MoCap_Body_part
 {
@@ -92,58 +90,21 @@ public:
   MoCap_Data();
   ~MoCap_Data() = default;
 
-  void node_sub(ros::NodeHandle nh);
-
-  void tick(double dt)
+  int seq_size()
   {
-    sub_mocap_.tick(dt);
-
-    sub_mocap_Lhd_acc.tick(dt);
-    sub_mocap_Lhd_pose.tick(dt);
+    return sequence_size;
   }
-
-  void Update_Data_();
-
-  bool Datas_Online()
+  void seq_size(int size)
   {
-    Data_stream =
-        sub_mocap_.data().isValid() && sub_mocap_Lhd_pose.data().isValid() && sub_mocap_Lhd_acc.data().isValid();
-    return Data_stream;
-  }
-
-  const Eigen::MatrixXd & get_LeftHandPose_seq()
-  {
-    return LeftHandPose_seq;
-  }
-  const Eigen::MatrixXd & get_LeftHandAcc_seq()
-  {
-    return LeftHandAcc_seq;
-  }
-  const Eigen::MatrixXd & get_RightHandPose_seq()
-  {
-    return RightHandPose_seq;
-  }
-  const Eigen::MatrixXd & get_RightHandAcc_seq()
-  {
-    return RightHandAcc_seq;
-  }
-
-  int ros_data_id()
-  {
-    if(sub_mocap_.data().isValid())
-    {
-      if(sub_mocap_.data().value().header.frame_id != "")
-      {
-        return std::stoi(sub_mocap_.data().value().header.frame_id);
-      }
-      return 0;
-    }
-    return 0;
+    sequence_size = size;
   }
 
   sva::PTransformd get_pose(MoCap_Body_part part);
   sva::MotionVecd get_vel(MoCap_Body_part part);
   Eigen::Vector3d get_linear_acc(MoCap_Body_part part);
+  Eigen::MatrixXd get_sequence(MoCap_Body_part part, MoCap_Parameters param, int size);
+
+  void convert_data(const std::string & data);
 
   double maxTime_ = 0.5;
   bool Data_stream = false;
@@ -160,33 +121,16 @@ public:
     }
   }
 
+private:
   Eigen::Vector3d MoCap_Coord(MoCap_Body_part joint, MoCap_Parameters param);
   Eigen::Quaterniond MoCap_Quat(MoCap_Body_part joint);
-  std::vector<float> GetParameters(MoCap_Body_part part, MoCap_Parameters param);
-  Eigen::MatrixXd Get_Sequence(MoCap_Body_part part, MoCap_Parameters param);
+  Eigen::VectorXd GetParameters(MoCap_Body_part part, MoCap_Parameters param);
 
-  int N_samples_in = 60;
-  double data_freq = 60;
-
-  double LeftLeg_Z0 = 0;
-  double RightLeg_Z0 = 0;
-
-  int id = 0;
+  int sequence_size = 60;
 
   std::chrono::high_resolution_clock::time_point t_clock;
-  
-  void convert_data(const std::string & data);
 
-
-private:
-
-  int n_elements_ = 16 * 21 + 3; //Number of data to take from the stream;
-
-  ROSMultiArrayStampedSubscriber sub_mocap_;
-  ROSMultiArrayStampedSubscriber sub_mocap_Lhd_pose;
-  ROSMultiArrayStampedSubscriber sub_mocap_Lhd_acc;
-  ROSMultiArrayStampedSubscriber sub_mocap_Rhd_pose;
-  ROSMultiArrayStampedSubscriber sub_mocap_Rhd_acc;
+  int n_elements_ = 16 * 21 + 3; // Number of data to take from the stream;
 
   Eigen::Vector2d FootState;
   Eigen::VectorXd m_Datas;

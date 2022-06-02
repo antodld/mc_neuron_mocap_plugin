@@ -5,8 +5,8 @@
 #pragma once
 
 #include <mc_control/GlobalPlugin.h>
-#include "MoCap.h"
 #include "ClientSocket.h"
+#include "MoCap.h"
 #include "SocketException.h"
 #include <iostream>
 
@@ -28,7 +28,6 @@ struct mocap_plugin : public mc_control::GlobalPlugin
   ~mocap_plugin() override;
 
 private:
-  std::shared_ptr<ros::NodeHandle> nh_;
   MoCap_Data mocap_;
   std::thread data_thread_;
 

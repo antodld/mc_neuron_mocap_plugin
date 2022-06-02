@@ -5,12 +5,10 @@
 
 #include "Socket.h"
 
-
 class ClientSocket : private Socket
 {
- public:
-
-  bool connected() 
+public:
+  bool connected()
   {
     return connected_;
   }
@@ -40,20 +38,17 @@ class ClientSocket : private Socket
   bool create();
 
   ClientSocket() = default;
-  ClientSocket ( std::string host, int port );
+  ClientSocket(std::string host, int port);
   virtual ~ClientSocket(){};
 
-  const ClientSocket& operator << ( const std::string& ) const;
-  const ClientSocket& operator >> ( std::string& ) const;
+  const ClientSocket & operator<<(const std::string &) const;
+  const ClientSocket & operator>>(std::string &) const;
 
-  private :
-
-    bool connected_ = false;
-    bool created_ = false;
-    int port_;
-    std::string host_;
-
+private:
+  bool connected_ = false;
+  bool created_ = false;
+  int port_;
+  std::string host_;
 };
-
 
 #endif
