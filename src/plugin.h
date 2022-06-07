@@ -5,8 +5,8 @@
 #pragma once
 
 #include <mc_control/GlobalPlugin.h>
+#include "../include/mc_neuron_mocap_plugin/MoCap.h"
 #include "ClientSocket.h"
-#include "MoCap.h"
 #include "SocketException.h"
 #include <iostream>
 

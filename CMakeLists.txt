@@ -39,12 +39,11 @@ set(plugin_SRC
   )
 
 set(plugin_HDR
-  src/MoCap.h
+  include/mc_neuron_mocap_plugin/MoCap.h
   src/plugin.h
   src/Socket.h
   src/ClientSocket.h
   src/SocketException.h
-
 )
 
 # The add_plugin macro is provided by mc_rtc
@@ -54,6 +53,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${roscpp_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${roscpp_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${std_msgs_stamped_INCLUDE_DIRS})
 
+install(
+  DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include)
 
 if(BUILD_TESTING)
   add_subdirectory(tests)

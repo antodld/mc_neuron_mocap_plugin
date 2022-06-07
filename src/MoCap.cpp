@@ -1,4 +1,4 @@
-#include "MoCap.h"
+#include "../include/mc_neuron_mocap_plugin/MoCap.h"
 
 MoCap_Data::MoCap_Data()
 {
@@ -47,7 +47,7 @@ sva::PTransformd MoCap_Data::get_pose(MoCap_Body_part part)
 }
 sva::MotionVecd MoCap_Data::get_vel(MoCap_Body_part part)
 {
-  return sva::MotionVecd(MoCap_Coord(part, MoCap_Gyro), MoCap_Coord(part, MoCap_Position));
+  return sva::MotionVecd(MoCap_Coord(part, MoCap_Gyro), MoCap_Coord(part, MoCap_Velocity));
 }
 Eigen::Vector3d MoCap_Data::get_linear_acc(MoCap_Body_part part)
 {
@@ -88,6 +88,16 @@ Eigen::MatrixXd MoCap_Data::get_sequence(MoCap_Body_part part, MoCap_Parameters 
 Eigen::VectorXd MoCap_Data::GetParameters(MoCap_Body_part part, MoCap_Parameters param)
 {
 
+  // std::cout << "required part" << part << std::endl;
+  if((part > RightHandThumb1 || part < 0) && param > MoCap_Position)
+  {
+    mc_rtc::log::warning("[mocap plugin] required index out of bounds");
+    if(param == MoCap_Quaternion)
+    {
+      return Eigen::VectorXd::Zero(4);
+    }
+    return Eigen::VectorXd::Zero(3);
+  }
   if(param > MoCap_Quaternion)
   {
 
