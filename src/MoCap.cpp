@@ -21,12 +21,13 @@ void MoCap_Data::convert_data(const std::string & data)
   // }
   size_t indx_start = 0;
   size_t pos = 0;
+  std::string empty_bracket = " ";
 
   while(double_data.size() < n_elements_)
   {
     size_t pos = data.find(' ', indx_start);
     std::string double_val = data.substr(indx_start, pos - indx_start);
-    if(pos < data.length()) (double_data.push_back(std::stod(double_val)));
+    if(pos < data.length() && double_val.compare(empty_bracket) != 0) (double_data.push_back(std::stod(double_val)));
     indx_start = pos + 1;
   }
 
@@ -54,35 +55,50 @@ Eigen::Vector3d MoCap_Data::get_linear_acc(MoCap_Body_part part)
   return Eigen::Vector3d(MoCap_Coord(part, MoCap_Accelerated_Velocity));
 }
 
-Eigen::MatrixXd MoCap_Data::get_sequence(MoCap_Body_part part, MoCap_Parameters param, int size)
+Eigen::MatrixXd MoCap_Data::get_sequence(MoCap_Body_part part, MoCap_Parameters param, int size, int freq)
 {
 
-  Eigen::MatrixXd Output = Eigen::MatrixXd::Zero(3, sequence_size);
+  // freq = mc_filter::utils::clampAndWarn(freq,0,data_freq_,"[mocap_plugin]");
+  freq = std::min(data_freq_, std::max(0, freq));
+  double f = static_cast<double>(freq);
+  double data_f = static_cast<double>(data_freq_);
+  int r = static_cast<int>(data_f / f);
+
+  size = std::min(sequence_size / r, std::max(0, size));
+
+  Eigen::MatrixXd seq = Eigen::MatrixXd::Zero(sequence_size, 3);
 
   if(param > MoCap_Quaternion)
   {
-    Output = Datas.block(sequence_size - size, 16 * part + param * 3 + 1, size, 3).transpose();
+    seq = Datas.block(sequence_size - size, 16 * part + param * 3 + 1, size, 3);
   }
   else if(param == MoCap_Quaternion)
   {
 
-    Output = Eigen::MatrixXd::Zero(4, sequence_size);
-    Output = Datas.block(sequence_size - size, 16 * part + param * 3 + 1, size, 4).transpose();
+    seq = Eigen::MatrixXd::Zero(sequence_size, 4);
+    seq = Datas.block(sequence_size - size, 16 * part + param * 3 + 1, size, 4);
   }
   else
   {
 
-    Output = Datas.block(sequence_size - size, 16 * part + param * 3, size, 3).transpose();
+    seq = Datas.block(sequence_size - size, 16 * part + param * 3, size, 3);
   }
 
   if(param == MoCap_Accelerated_Velocity)
   {
 
-    Output.row(2) -= Eigen::VectorXd::Ones(Output.cols());
-    Output *= 9.8;
+    seq.col(2) -= Eigen::VectorXd::Ones(seq.rows());
+    seq *= 9.8;
+  }
+  Eigen::MatrixXd Output(Eigen::MatrixXd::Zero(sequence_size / r, seq.cols()));
+  int incr = 2;
+  for(int i = 0; i < Output.rows(); i++)
+  {
+
+    Output.block(Output.rows() - 1 - i, 0, 1, Output.cols()) = seq.block(seq.rows() - 1 - i * r, 0, 1, seq.cols());
   }
 
-  return Output;
+  return Output.transpose();
 }
 
 Eigen::VectorXd MoCap_Data::GetParameters(MoCap_Body_part part, MoCap_Parameters param)

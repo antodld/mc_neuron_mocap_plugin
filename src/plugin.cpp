@@ -20,6 +20,7 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
   config("ip", ip_);
   config("port", n_port_);
   config("frequency", freq_);
+  mocap_.data_freq(freq_);
   mocap_.seq_size(config("sequence_size"));
 
   mc_rtc::log::info("[mocap plugin] Initialize mocap connection");
@@ -30,8 +31,9 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
   controller.controller().datastore().make<bool>("mocap_plugin::online");
 
   controller.controller().datastore().make_call(
-      "mocap_plugin::get_sequence", [this](MoCap_Body_part part, MoCap_Parameters param, int size) -> Eigen::MatrixXd {
-        return mocap_.get_sequence(part, param, size);
+      "mocap_plugin::get_sequence",
+      [this](MoCap_Body_part part, MoCap_Parameters param, int size, int freq) -> Eigen::MatrixXd {
+        return mocap_.get_sequence(part, param, size, freq);
       });
   controller.controller().datastore().make_call(
       "mocap_plugin::get_pose", [this](MoCap_Body_part part) -> sva::PTransformd { return mocap_.get_pose(part); });
@@ -42,6 +44,9 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
       [this](MoCap_Body_part part) -> Eigen::Vector3d { return mocap_.get_linear_acc(part); });
   controller.controller().datastore().make_call(
       "mocap_plugin::get_footstate", [this](MoCap_Body_part part) -> int { return mocap_.foot_contact(part); });
+  controller.controller().datastore().make_call("mocap_plugin::get_data_frequency", [this]() -> int { return freq_; });
+  controller.controller().datastore().make_call("mocap_plugin::get_sequence_size",
+                                                [this]() -> int { return mocap_.seq_size(); });
 
   controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Label("Online", [this]() -> std::string {
                                               if(mocap_online_)
@@ -99,8 +104,14 @@ void mocap_plugin::Data_Spinner()
     if(client_socket_.connected())
     {
       std::string data;
-      client_socket_ >> data;
-      mocap_.convert_data(data);
+      try
+      {
+        client_socket_ >> data;
+        mocap_.convert_data(data);
+      }
+      catch(SocketException &)
+      {
+      }
     }
     else
     {
