@@ -27,7 +27,21 @@ void MoCap_Data::convert_data(const std::string & data)
   {
     size_t pos = data.find(' ', indx_start);
     std::string double_val = data.substr(indx_start, pos - indx_start);
-    if(pos < data.length() && double_val.compare(empty_bracket) != 0) (double_data.push_back(std::stod(double_val)));
+    double val;
+    try
+    {
+      val = std::stod(double_val);
+    }
+    catch(const std::exception & e)
+    {
+      std::cout << "error in mocap data stream" << '\n';
+      val = 0.;
+    }
+    if(pos < data.length())
+    {
+      double_data.push_back(val);
+    };
+
     indx_start = pos + 1;
   }
 

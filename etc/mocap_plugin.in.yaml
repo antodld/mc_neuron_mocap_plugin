@@ -1,5 +1,5 @@
 ---
-ip : "172.30.1.15"
+ip : "172.17.0.1"
 port : 7001
 frequency: 60
 sequence_size : 60

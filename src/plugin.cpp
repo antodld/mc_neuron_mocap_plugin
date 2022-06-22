@@ -17,19 +17,27 @@ mocap_plugin::~mocap_plugin()
 void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rtc::Configuration & config)
 {
 
-  config("ip", ip_);
-  config("port", n_port_);
-  config("frequency", freq_);
-  mocap_.data_freq(freq_);
-  mocap_.seq_size(config("sequence_size"));
+  // config("ip", ip_);
+  // config("port", n_port_);
+  // config("frequency", freq_);
+  // mocap_.data_freq(freq_);
+  // mocap_.seq_size(config("sequence_size"));
 
   mc_rtc::log::info("[mocap plugin] Initialize mocap connection");
 
-  data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-  data_thread_.detach();
+  // data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+  // data_thread_.detach();
+
+  if(controller.controller().config().has("mocap_plugin"))
+  {
+    configure(controller.controller().config()("mocap_plugin"));
+  }
+  else
+  {
+    configure(config);
+  }
 
   controller.controller().datastore().make<bool>("mocap_plugin::online");
-
   controller.controller().datastore().make_call(
       "mocap_plugin::get_sequence",
       [this](MoCap_Body_part part, MoCap_Parameters param, int size, int freq) -> Eigen::MatrixXd {
@@ -58,7 +66,6 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
                                                 return "False";
                                               }
                                             }));
-  mc_rtc::log::info("mocap_plugin::init called with configuration:\n{}", config.dump(true, true));
 }
 
 void mocap_plugin::reset(mc_control::MCGlobalController & controller)

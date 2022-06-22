@@ -25,6 +25,34 @@ struct mocap_plugin : public mc_control::GlobalPlugin
 
   mc_control::GlobalPlugin::GlobalPluginConfiguration configuration() override;
 
+  void configure(const mc_rtc::Configuration & config)
+  {
+    mc_rtc::log::info("mocap_plugin::init called with configuration:\n{}", config.dump(true, true));
+    if(config.has("ip"))
+    {
+      config("ip", ip_);
+    }
+    if(config.has("port"))
+    {
+      config("port", n_port_);
+    }
+    if(config.has("frequency"))
+    {
+      config("frequency", freq_);
+    }
+    if(config.has("sequence_size"))
+    {
+      mocap_.seq_size(config("sequence_size"));
+    }
+    spinner_on_ = false;
+    if(data_thread_.joinable())
+    {
+      data_thread_.join();
+    }
+    data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+    data_thread_.detach();
+  }
+
   ~mocap_plugin() override;
 
 private:
