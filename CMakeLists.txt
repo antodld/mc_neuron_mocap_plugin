@@ -18,10 +18,7 @@ enable_testing()
 if(NOT TARGET mc_rtc::mc_control)
   find_package(mc_rtc REQUIRED)
 endif()
-find_package(roscpp REQUIRED)
-find_package(catkin REQUIRED COMPONENTS
-  std_msgs_stamped
-) 
+
 
 
 
