@@ -114,7 +114,16 @@ void mocap_plugin::Data_Spinner()
       try
       {
         client_socket_ >> data;
-        mocap_.convert_data(data);
+        // std::cout << data.size() << std::endl;
+        // if (data.size() < 25000 && data.size() > 5000)
+        if (data.size() > 5000)
+        {
+          mocap_.convert_data(data);
+        }
+        // else
+        // {
+        //   std::cout << "bad data " << data.size() << std::endl;
+        // }
       }
       catch(SocketException &)
       {

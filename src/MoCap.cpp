@@ -9,35 +9,54 @@ MoCap_Data::MoCap_Data()
   LeftHandAcc_seq = Eigen::MatrixXd::Zero(sequence_size, 3);
 }
 
-void MoCap_Data::convert_data(const std::string & data)
+void MoCap_Data::convert_data(std::string & data)
 {
+  if (data[0] == ' ')
+  {
+    std::cout << "here" << std::endl;
+    data = data.substr(1, data.size() - 1);
+  }
   std::chrono::high_resolution_clock::time_point t_clock = std::chrono::high_resolution_clock::now();
   std::vector<double> double_data;
-  // std::stringstream data_stream(data);
+  std::stringstream data_stream(data);
   // std::string item;
   // while (std::getline(data_stream, item, ' ')) {
   //     std::cout << " item " << item << std::endl;
-  //     if(item.size() !=0){double_data.push_back(stod(item))};
+  //     // if(item.size() !=0){double_data.push_back(stod(item))};
   // }
   size_t indx_start = 0;
   size_t pos = 0;
   std::string empty_bracket = " ";
-
-  while(double_data.size() < n_elements_)
+  // std::stringstream data_stream(data);
+  std::string double_val;
+  // std::cout << data.size() << std::endl;
+  while(std::getline(data_stream, double_val, ' ') )
   {
-    size_t pos = data.find(' ', indx_start);
-    std::string double_val = data.substr(indx_start, pos - indx_start);
+    // size_t pos = data.find(' ', indx_start);
+    // std::string double_val = data.substr(indx_start, pos - indx_start);
     double val;
+    if (double_data.size() == n_elements_)
+    {
+      break;
+    }
     try
     {
-      val = std::stod(double_val);
+      val = stod(double_val);
+      // std::cout << val << std::endl;
     }
     catch(const std::exception & e)
     {
-      std::cout << "error in mocap data stream" << '\n';
+      std::cout << "error at indx :" << static_cast<int>(double_data.size()) - 1  << " n_elements " << n_elements_ << " with val:" << double_val << '\n';
+      std::cout << data.size() << std::endl;
+      
       val = 0.;
+      if ( double_data.size() - 1 < m_Datas.size())
+      {
+        val = m_Datas(double_data.size() - 1);
+      }
+      
     }
-    if(pos < data.length())
+    if(double_data.size() < n_elements_)
     {
       double_data.push_back(val);
     };

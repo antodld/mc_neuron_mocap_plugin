@@ -49,6 +49,7 @@ struct mocap_plugin : public mc_control::GlobalPlugin
     {
       data_thread_.join();
     }
+    spinner_on_ = true;
     data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
     data_thread_.detach();
   }
