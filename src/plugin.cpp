@@ -84,6 +84,7 @@ void mocap_plugin::before(mc_control::MCGlobalController &)
 void mocap_plugin::after(mc_control::MCGlobalController & controller)
 {
 
+  // std::cout << "here " << std::endl;
   controller.controller().datastore().assign<bool>("mocap_plugin::online", mocap_online_);
 
   // mc_rtc::log::info(mocap_.foot_contact(LeftFoot));

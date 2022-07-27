@@ -13,8 +13,10 @@ void MoCap_Data::convert_data(std::string & data)
 {
   if (data[0] == ' ')
   {
-    std::cout << "here" << std::endl;
-    data = data.substr(1, data.size() - 1);
+    // std::cout << "here" << std::endl;
+    std::cout << data << std::endl;
+    std::cout << "//" << std::endl;
+    // data = data.substr(1, data.size() - 1);
   }
   std::chrono::high_resolution_clock::time_point t_clock = std::chrono::high_resolution_clock::now();
   std::vector<double> double_data;
