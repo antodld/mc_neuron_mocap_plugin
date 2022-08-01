@@ -11,29 +11,24 @@ MoCap_Data::MoCap_Data()
 
 void MoCap_Data::convert_data(std::string & data)
 {
+
+
   if (data[0] == ' ')
   {
-    std::cout << "here" << std::endl;
-    data = data.substr(1, data.size() - 1);
+    // std::cout << "here" << std::endl;
+    std::cout << data << std::endl;
+    std::cout << "//" << std::endl;
+    // data = data.substr(1, data.size() - 1);
   }
   std::chrono::high_resolution_clock::time_point t_clock = std::chrono::high_resolution_clock::now();
   std::vector<double> double_data;
   std::stringstream data_stream(data);
-  // std::string item;
-  // while (std::getline(data_stream, item, ' ')) {
-  //     std::cout << " item " << item << std::endl;
-  //     // if(item.size() !=0){double_data.push_back(stod(item))};
-  // }
   size_t indx_start = 0;
   size_t pos = 0;
-  std::string empty_bracket = " ";
-  // std::stringstream data_stream(data);
   std::string double_val;
-  // std::cout << data.size() << std::endl;
   while(std::getline(data_stream, double_val, ' ') )
   {
-    // size_t pos = data.find(' ', indx_start);
-    // std::string double_val = data.substr(indx_start, pos - indx_start);
+
     double val;
     if (double_data.size() == n_elements_)
     {

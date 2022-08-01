@@ -84,6 +84,7 @@ void mocap_plugin::before(mc_control::MCGlobalController &)
 void mocap_plugin::after(mc_control::MCGlobalController & controller)
 {
 
+  // std::cout << "here " << std::endl;
   controller.controller().datastore().assign<bool>("mocap_plugin::online", mocap_online_);
 
   // mc_rtc::log::info(mocap_.foot_contact(LeftFoot));
@@ -111,9 +112,18 @@ void mocap_plugin::Data_Spinner()
     if(client_socket_.connected())
     {
       std::string data;
+    
       try
       {
         client_socket_ >> data;
+
+        size_t data_indx_start = data.find("\n");
+        if (data_indx_start != std::string::npos)
+        {
+          // std::cout << "start at " << data_indx_start << " size " << data.size() << std::endl;
+          data = data.substr(data_indx_start + 1,data.size() - data_indx_start);
+          // std::cout << "first elements " << data.substr(0,10) << std::endl;
+        }
         // std::cout << data.size() << std::endl;
         // if (data.size() < 25000 && data.size() > 5000)
         if (data.size() > 5000)
