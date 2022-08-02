@@ -18,7 +18,7 @@ Installation
 
 1. Download Axis Neuron software : 
 ```bash
-wget https://neuronmocap.com/sites/default/files/Axis_Neuron_x64_3_8_42_8591_20180411034619617000_X64.zip
+wget https://files.neuronmocap.com/axis/Axis_Neuron_x64_3_8_42_8591_20180411034619617000_X64.zip
 ```
 2. Unzip: 
 ```bash 
