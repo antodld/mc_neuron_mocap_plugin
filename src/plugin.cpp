@@ -25,8 +25,10 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
 
   mc_rtc::log::info("[mocap plugin] Initialize mocap connection");
 
-  // data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-  // data_thread_.detach();
+  spinner_on_ = true;
+  data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+  data_thread_.detach();
+  mc_rtc::log::info("[mocap plugin] data spinner thread created");
 
   if(controller.controller().config().has("mocap_plugin"))
   {
@@ -66,11 +68,20 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
                                                 return "False";
                                               }
                                             }));
+
+  mc_rtc::log::success("[mocap plugin] Initialized");
 }
 
 void mocap_plugin::reset(mc_control::MCGlobalController & controller)
 {
 
+  spinner_on_ = false;
+  if(data_thread_.joinable())
+  {
+    data_thread_.join();
+  }
+  spinner_on_ = true;
+  
   data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
   data_thread_.detach();
   mc_rtc::log::info("mocap_plugin::reset called");
