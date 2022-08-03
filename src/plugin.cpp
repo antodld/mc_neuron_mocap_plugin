@@ -69,6 +69,27 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
                                                 return "False";
                                               }
                                             }));
+  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Label("ip", [this]() -> std::string {return ip_;}));
+  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Label("n_port", [this]() -> int {return n_port_;}));
+  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Button("kill connection", [this]() 
+  {  
+    spinner_on_ = false;
+    if(data_thread_.joinable())
+    {
+      data_thread_.join();
+    }
+  })
+  );
+  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Button("start connection", [this]() 
+  {  
+    spinner_on_ = true;
+    if(!data_thread_.joinable())
+    {
+      data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+      data_thread_.detach();
+    }
+  })
+  );
 
   mc_rtc::log::success("[mocap plugin] Initialized");
 }
@@ -117,9 +138,11 @@ void mocap_plugin::Data_Spinner()
 {
 
   ClientSocket client_socket_ = ClientSocket(ip_, n_port_);
+  
 
   while(spinner_on_)
   {
+    
 
     if(client_socket_.connected())
     {
@@ -127,7 +150,10 @@ void mocap_plugin::Data_Spinner()
     
       try
       {
+        std::chrono::high_resolution_clock::time_point t_clock = std::chrono::high_resolution_clock::now();
         client_socket_ >> data;
+        std::chrono::duration<double, std::milli> time_span = std::chrono::high_resolution_clock::now() - t_clock;
+        // std::cout << "[mocap plugin thread] socket call dt : " << time_span.count() << " ms" << std::endl;
 
         size_t data_indx_start = data.find("\n");
         if (data_indx_start != std::string::npos)
@@ -146,6 +172,8 @@ void mocap_plugin::Data_Spinner()
         // {
         //   std::cout << "bad data " << data.size() << std::endl;
         // }
+        time_span = std::chrono::high_resolution_clock::now() - t_clock;
+        // std::cout << "[mocap plugin thread] global dt : " << time_span.count() << " ms" << std::endl;
       }
       catch(SocketException &)
       {
@@ -159,6 +187,7 @@ void mocap_plugin::Data_Spinner()
 
     std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(1e3 / static_cast<double>(freq_))));
   }
+  mocap_online_ = false;
 }
 
 } // namespace mc_plugin

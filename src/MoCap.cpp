@@ -13,18 +13,9 @@ void MoCap_Data::convert_data(std::string & data)
 {
 
 
-  if (data[0] == ' ')
-  {
-    // std::cout << "here" << std::endl;
-    std::cout << data << std::endl;
-    std::cout << "//" << std::endl;
-    // data = data.substr(1, data.size() - 1);
-  }
   std::chrono::high_resolution_clock::time_point t_clock = std::chrono::high_resolution_clock::now();
   std::vector<double> double_data;
   std::stringstream data_stream(data);
-  size_t indx_start = 0;
-  size_t pos = 0;
   std::string double_val;
   while(std::getline(data_stream, double_val, ' ') )
   {
@@ -43,8 +34,6 @@ void MoCap_Data::convert_data(std::string & data)
     {
       std::cout << "error at indx :" << static_cast<int>(double_data.size()) - 1  << " n_elements " << n_elements_ << " with val:" << double_val << '\n';
       std::cout << data.size() << std::endl;
-      
-      val = 0.;
       if ( double_data.size() - 1 < m_Datas.size())
       {
         val = m_Datas(double_data.size() - 1);
@@ -56,7 +45,6 @@ void MoCap_Data::convert_data(std::string & data)
       double_data.push_back(val);
     };
 
-    indx_start = pos + 1;
   }
 
   m_Datas = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(double_data.data(), double_data.size());

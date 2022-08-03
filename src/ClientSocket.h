@@ -8,7 +8,7 @@
 class ClientSocket : private Socket
 {
 public:
-  bool connected()
+  bool connected() const noexcept
   {
     return connected_;
   }
@@ -39,7 +39,7 @@ public:
 
   ClientSocket() = default;
   ClientSocket(std::string host, int port);
-  virtual ~ClientSocket(){};
+  virtual ~ClientSocket() = default;
 
   const ClientSocket & operator<<(const std::string &) const;
   const ClientSocket & operator>>(std::string &) const;
