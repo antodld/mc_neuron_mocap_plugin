@@ -25,19 +25,20 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
 
   mc_rtc::log::info("[mocap plugin] Initialize mocap connection");
 
-  spinner_on_ = true;
-  data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-  data_thread_.detach();
-  mc_rtc::log::info("[mocap plugin] data spinner thread created");
-
   if(controller.controller().config().has("mocap_plugin"))
   {
     configure(controller.controller().config()("mocap_plugin"));
   }
   else
   {
+    mc_rtc::log::warning("[mocap plugin] Using default configuration");
     configure(config);
   }
+
+  spinner_on_ = true;
+  data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+  data_thread_.detach();
+  mc_rtc::log::info("[mocap plugin] data spinner thread created");
 
   controller.controller().datastore().make<bool>("mocap_plugin::online");
   controller.controller().datastore().make_call(
