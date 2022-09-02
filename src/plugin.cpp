@@ -58,6 +58,21 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
   controller.controller().datastore().make_call("mocap_plugin::get_data_frequency", [this]() -> int { return freq_; });
   controller.controller().datastore().make_call("mocap_plugin::get_sequence_size",
                                                 [this]() -> int { return mocap_.seq_size(); });
+  controller.controller().datastore().make_call("mocap_plugin::deactivate", [this]() {
+    spinner_on_ = false;
+    if(data_thread_.joinable())
+    {
+      data_thread_.join();
+    }
+  });
+  controller.controller().datastore().make_call("mocap_plugin::activate", [this]() {
+    spinner_on_ = true;
+    if(!data_thread_.joinable())
+    {
+      data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+      data_thread_.detach();
+    }
+  });
 
   controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Label("Online", [this]() -> std::string {
                                               if(mocap_online_)
@@ -69,27 +84,25 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
                                                 return "False";
                                               }
                                             }));
-  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Label("ip", [this]() -> std::string {return ip_;}));
-  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Label("n_port", [this]() -> int {return n_port_;}));
-  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Button("kill connection", [this]() 
-  {  
-    spinner_on_ = false;
-    if(data_thread_.joinable())
-    {
-      data_thread_.join();
-    }
-  })
-  );
-  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Button("start connection", [this]() 
-  {  
-    spinner_on_ = true;
-    if(!data_thread_.joinable())
-    {
-      data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-      data_thread_.detach();
-    }
-  })
-  );
+  controller.controller().gui()->addElement({"mocap_plugin"},
+                                            mc_rtc::gui::Label("ip", [this]() -> std::string { return ip_; }));
+  controller.controller().gui()->addElement({"mocap_plugin"},
+                                            mc_rtc::gui::Label("n_port", [this]() -> int { return n_port_; }));
+  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Button("kill connection", [this]() {
+                                              spinner_on_ = false;
+                                              if(data_thread_.joinable())
+                                              {
+                                                data_thread_.join();
+                                              }
+                                            }));
+  controller.controller().gui()->addElement({"mocap_plugin"}, mc_rtc::gui::Button("start connection", [this]() {
+                                              spinner_on_ = true;
+                                              if(!data_thread_.joinable())
+                                              {
+                                                data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+                                                data_thread_.detach();
+                                              }
+                                            }));
 
   mc_rtc::log::success("[mocap plugin] Initialized");
 }
@@ -102,10 +115,12 @@ void mocap_plugin::reset(mc_control::MCGlobalController & controller)
   {
     data_thread_.join();
   }
-  spinner_on_ = true;
-  
-  data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-  data_thread_.detach();
+  if(active_at_start_)
+  {
+    spinner_on_ = true;
+    data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+    data_thread_.detach();
+  }
   mc_rtc::log::info("mocap_plugin::reset called");
 }
 
@@ -138,16 +153,14 @@ void mocap_plugin::Data_Spinner()
 {
 
   ClientSocket client_socket_ = ClientSocket(ip_, n_port_);
-  
 
   while(spinner_on_)
   {
-    
 
     if(client_socket_.connected())
     {
       std::string data;
-    
+
       try
       {
         std::chrono::high_resolution_clock::time_point t_clock = std::chrono::high_resolution_clock::now();
@@ -156,15 +169,15 @@ void mocap_plugin::Data_Spinner()
         // std::cout << "[mocap plugin thread] socket call dt : " << time_span.count() << " ms" << std::endl;
 
         size_t data_indx_start = data.find("\n");
-        if (data_indx_start != std::string::npos)
+        if(data_indx_start != std::string::npos)
         {
           // std::cout << "start at " << data_indx_start << " size " << data.size() << std::endl;
-          data = data.substr(data_indx_start + 1,data.size() - data_indx_start);
+          data = data.substr(data_indx_start + 1, data.size() - data_indx_start);
           // std::cout << "first elements " << data.substr(0,10) << std::endl;
         }
         // std::cout << data.size() << std::endl;
         // if (data.size() < 25000 && data.size() > 5000)
-        if (data.size() > 5000)
+        if(data.size() > 5000)
         {
           mocap_.convert_data(data);
         }

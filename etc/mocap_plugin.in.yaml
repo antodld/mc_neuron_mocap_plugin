@@ -3,3 +3,4 @@ ip : "172.17.0.1"
 port : 7001
 frequency: 60
 sequence_size : 60
+activate_on_start: true

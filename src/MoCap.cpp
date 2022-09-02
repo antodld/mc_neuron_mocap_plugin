@@ -12,16 +12,15 @@ MoCap_Data::MoCap_Data()
 void MoCap_Data::convert_data(std::string & data)
 {
 
-
   std::chrono::high_resolution_clock::time_point t_clock = std::chrono::high_resolution_clock::now();
   std::vector<double> double_data;
   std::stringstream data_stream(data);
   std::string double_val;
-  while(std::getline(data_stream, double_val, ' ') )
+  while(std::getline(data_stream, double_val, ' '))
   {
 
     double val;
-    if (double_data.size() == n_elements_)
+    if(double_data.size() == n_elements_)
     {
       break;
     }
@@ -32,19 +31,18 @@ void MoCap_Data::convert_data(std::string & data)
     }
     catch(const std::exception & e)
     {
-      std::cout << "error at indx :" << static_cast<int>(double_data.size()) - 1  << " n_elements " << n_elements_ << " with val:" << double_val << '\n';
+      std::cout << "error at indx :" << static_cast<int>(double_data.size()) - 1 << " n_elements " << n_elements_
+                << " with val:" << double_val << '\n';
       std::cout << data.size() << std::endl;
-      if ( double_data.size() - 1 < m_Datas.size())
+      if(double_data.size() - 1 < m_Datas.size())
       {
         val = m_Datas(double_data.size() - 1);
       }
-      
     }
     if(double_data.size() < n_elements_)
     {
       double_data.push_back(val);
     };
-
   }
 
   m_Datas = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(double_data.data(), double_data.size());

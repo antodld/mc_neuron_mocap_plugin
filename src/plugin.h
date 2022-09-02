@@ -44,14 +44,21 @@ struct mocap_plugin : public mc_control::GlobalPlugin
     {
       mocap_.seq_size(config("sequence_size"));
     }
+    if(config.has("activate_on_start"))
+    {
+      config("activate_on_start", active_at_start_);
+    }
     spinner_on_ = false;
     if(data_thread_.joinable())
     {
       data_thread_.join();
     }
-    spinner_on_ = true;
-    data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-    data_thread_.detach();
+    if(active_at_start_)
+    {
+      spinner_on_ = true;
+      data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
+      data_thread_.detach();
+    }
   }
 
   ~mocap_plugin() override;
@@ -66,6 +73,7 @@ private:
 
   bool spinner_on_ = true;
   bool mocap_online_ = false;
+  bool active_at_start_ = true;
 
   void Data_Spinner();
   sva::PTransformd get_pose(MoCap_Body_part part);
