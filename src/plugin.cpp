@@ -107,7 +107,7 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
   mc_rtc::log::success("[mocap plugin] Initialized");
 }
 
-void mocap_plugin::reset(mc_control::MCGlobalController & controller)
+void mocap_plugin::reset(mc_control::MCGlobalController &)
 {
 
   spinner_on_ = false;
