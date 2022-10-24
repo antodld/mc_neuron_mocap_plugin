@@ -5,4 +5,4 @@ Enabled: Posture
 IncludeHalfSitController: false
 ClearGlobalPluginiPath: true
 Plugins: [ mocap_plugin ]
-GlobalPluginPaths: ["$<TARGET_FILE_DIR:mocap_plugin>"]
+GlobalPluginPaths: ["$<TARGET_FILE_DIR:mc_neuron_mocap_plugin>"]
