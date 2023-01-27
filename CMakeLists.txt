@@ -46,29 +46,7 @@ install(TARGETS mc_neuron_mocap_properties
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
-
-set(plugin_SRC
-  src/plugin.cpp
-  src/MoCap.cpp
-  src/ClientSocket.cpp
-  src/Socket.cpp
-  )
-
-set(plugin_HDR
-  include/mc_neuron_mocap_plugin/MoCap.h
-  src/plugin.h
-  src/Socket.h
-  src/ClientSocket.h
-  src/SocketException.h
-)
-
-# The add_plugin macro is provided by mc_rtc
-add_plugin(${PROJECT_NAME} "${plugin_SRC}" "${plugin_HDR}")
-target_include_directories(${PROJECT_NAME} PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>)
-target_link_libraries(${PROJECT_NAME} PUBLIC mc_neuron_mocap_properties)
-target_include_directories(${PROJECT_NAME} PUBLIC ${roscpp_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PUBLIC ${roscpp_LIBRARIES})
-target_include_directories(${PROJECT_NAME} PUBLIC ${std_msgs_stamped_INCLUDE_DIRS})
+add_subdirectory(src)
 
 install(
   DIRECTORY ${CMAKE_SOURCE_DIR}/include/ DESTINATION include)
