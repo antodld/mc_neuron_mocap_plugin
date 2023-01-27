@@ -64,6 +64,7 @@ struct mocap_plugin : public mc_control::GlobalPlugin
   ~mocap_plugin() override;
 
 private:
+  mc_rtc::Configuration config_;
   MoCap_Data mocap_;
   std::thread data_thread_;
 
