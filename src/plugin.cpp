@@ -16,15 +16,14 @@ mocap_plugin::~mocap_plugin()
 
 void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rtc::Configuration & config)
 {
-
-  // config("ip", ip_);
-  // config("port", n_port_);
-  // config("frequency", freq_);
-  // mocap_.data_freq(freq_);
-  // mocap_.seq_size(config("sequence_size"));
-
   mc_rtc::log::info("[mocap plugin] Initialize mocap connection");
+  config_ = config;
+  reset(controller);
+  mc_rtc::log::success("[mocap plugin] Initialized");
+}
 
+void mocap_plugin::reset(mc_control::MCGlobalController & controller)
+{
   if(controller.controller().config().has("mocap_plugin"))
   {
     configure(controller.controller().config()("mocap_plugin"));
@@ -32,13 +31,24 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
   else
   {
     mc_rtc::log::warning("[mocap plugin] Using default configuration");
-    configure(config);
+    configure(config_);
   }
 
-  // spinner_on_ = true;
-  // data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-  // data_thread_.detach();
-  // mc_rtc::log::info("[mocap plugin] data spinner thread created");
+  controller.controller().gui()->removeCategory({"mocap_plugin"});
+  if(controller.controller().datastore().has("mocap_plugin::online"))
+  {
+    auto & ds = controller.controller().datastore();
+    ds.remove("mocap_plugin::online");
+    ds.remove("mocap_plugin::get_sequence");
+    ds.remove("mocap_plugin::get_pose");
+    ds.remove("mocap_plugin::get_velocity");
+    ds.remove("mocap_plugin::get_accel");
+    ds.remove("mocap_plugin::get_footstate");
+    ds.remove("mocap_plugin::get_data_frequency");
+    ds.remove("mocap_plugin::get_sequence_size");
+    ds.remove("mocap_plugin::activate");
+    ds.remove("mocap_plugin::deactivate");
+  }
 
   controller.controller().datastore().make<bool>("mocap_plugin::online");
   controller.controller().datastore().make_call(
@@ -103,12 +113,6 @@ void mocap_plugin::init(mc_control::MCGlobalController & controller, const mc_rt
                                                 data_thread_.detach();
                                               }
                                             }));
-
-  mc_rtc::log::success("[mocap plugin] Initialized");
-}
-
-void mocap_plugin::reset(mc_control::MCGlobalController &)
-{
 
   spinner_on_ = false;
   if(data_thread_.joinable())

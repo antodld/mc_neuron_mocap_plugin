@@ -3,6 +3,6 @@ MainRobot: JVRC1
 Enabled: Posture
 
 IncludeHalfSitController: false
-ClearGlobalPluginiPath: true
+ClearGlobalPluginPath: true
 Plugins: [ mocap_plugin ]
 GlobalPluginPaths: ["$<TARGET_FILE_DIR:mc_neuron_mocap_plugin>"]

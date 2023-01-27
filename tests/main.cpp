@@ -55,6 +55,11 @@ int main(int argc, char * argv[])
     {
       return 1;
     }
+    if(!gc.controller().datastore().has("mocap_plugin::online"))
+    {
+      mc_rtc::log::critical("mocap_plugin has not been loaded?");
+      return 1;
+    }
   }
 
   return 0;
