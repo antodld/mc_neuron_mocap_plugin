@@ -1,8 +1,8 @@
 #pragma once
 #include <mc_control/mc_controller.h>
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/Eigen>
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <Eigen/Eigen>
 #include <ctime>
 #include <fstream>
 #include <iostream>
@@ -20,7 +20,6 @@ class MoCap_Data
 {
 
 public:
-
   MoCap_Data();
   ~MoCap_Data() = default;
 
@@ -44,7 +43,7 @@ public:
   sva::PTransformd get_pose(MoCap_Body_part part);
   sva::MotionVecd get_vel(MoCap_Body_part part);
   Eigen::Vector3d get_linear_acc(MoCap_Body_part part);
-  Eigen::MatrixXd get_sequence(MoCap_Body_part part, MoCap_Parameters param, int size,int freq);
+  Eigen::MatrixXd get_sequence(MoCap_Body_part part, MoCap_Parameters param, int size, int freq);
 
   void convert_data(std::string & data);
 
