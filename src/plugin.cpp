@@ -80,7 +80,6 @@ void mocap_plugin::reset(mc_control::MCGlobalController & controller)
     if(!data_thread_.joinable())
     {
       data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-      data_thread_.detach();
     }
   });
 
@@ -110,7 +109,6 @@ void mocap_plugin::reset(mc_control::MCGlobalController & controller)
                                               if(!data_thread_.joinable())
                                               {
                                                 data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-                                                data_thread_.detach();
                                               }
                                             }));
 
@@ -123,7 +121,6 @@ void mocap_plugin::reset(mc_control::MCGlobalController & controller)
   {
     spinner_on_ = true;
     data_thread_ = std::thread(&mocap_plugin::Data_Spinner, this);
-    data_thread_.detach();
   }
   mc_rtc::log::info("mocap_plugin::reset called");
 }
